@@ -1,0 +1,16 @@
+{
+  "name": "Питание",
+  "short_name": "Питание",
+  "description": "Дневник питания: калории, белки, жиры, углеводы и суточная норма",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFF4E8",
+  "theme_color": "#F05A1A",
+  "lang": "ru",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

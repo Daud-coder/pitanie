@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Питание</title>
+  <meta name="theme-color" content="#FFF4E8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1A120E" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Питание">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/favicon.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Вход -->
+<section class="lock" id="lock" hidden>
+  <div class="lock__box">
+    <img src="icons/icon-192.png" alt="" width="84" height="84">
+    <h1>Питание</h1>
+    <p>Код, который ты задал в таблице:<br><b>Питание → Код для приложения</b></p>
+    <form id="lockForm" autocomplete="off">
+      <input id="pinInput" type="password" placeholder="Код" autocomplete="current-password" required minlength="6">
+      <button class="btn btn--main" type="submit">Войти</button>
+    </form>
+    <p class="lock__err" id="lockErr" role="alert"></p>
+  </div>
+</section>
+
+<div class="app" id="app" hidden>
+  <header class="head">
+    <div class="head__row">
+      <h1 class="brand">Питание</h1>
+      <p class="head__note" id="syncNote"></p>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Разделы">
+      <button role="tab" data-tab="day" aria-selected="true">День</button>
+      <button role="tab" data-tab="trend" aria-selected="false">Динамика</button>
+      <button role="tab" data-tab="me" aria-selected="false">Я</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- День -->
+    <section class="view" data-view="day">
+      <div class="strip" id="strip" aria-label="Дни"></div>
+
+      <div class="ringcard">
+        <div class="rings">
+          <svg viewBox="0 0 200 200" id="rings" aria-hidden="true"></svg>
+          <div class="rings__c">
+            <b id="kLeft">—</b>
+            <span id="kLeftL">осталось ккал</span>
+          </div>
+        </div>
+        <div class="ringcard__side">
+          <div class="kpair"><span>Съедено</span><b id="kEaten">0</b></div>
+          <div class="kpair"><span>Норма</span><b id="kNorm">—</b></div>
+          <ul class="macros" id="macros"></ul>
+        </div>
+      </div>
+
+      <p class="tip" id="tip" hidden></p>
+
+      <div id="meals"></div>
+    </section>
+
+    <!-- Динамика -->
+    <section class="view" data-view="trend" hidden>
+      <div class="seg" id="range">
+        <button data-r="7" aria-pressed="false">7 дней</button>
+        <button data-r="14" aria-pressed="true">14 дней</button>
+        <button data-r="30" aria-pressed="false">30 дней</button>
+      </div>
+      <div class="panel">
+        <div class="panel__h"><h2>Калории</h2><span id="kAvg"></span></div>
+        <div class="cols" id="cols"></div>
+        <p class="legend-n"><i></i> норма</p>
+      </div>
+      <div class="panel">
+        <div class="panel__h"><h2>КБЖУ в среднем</h2><span>от нормы</span></div>
+        <ul class="avgm" id="avgm"></ul>
+      </div>
+      <div class="panel">
+        <div class="panel__h"><h2>Вес</h2><span id="wNote"></span></div>
+        <svg class="wline" id="wline" viewBox="0 0 320 120" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <p class="muted small" id="wEmpty">Скажи кнопке «вешу 82» — здесь появится график.</p>
+      </div>
+    </section>
+
+    <!-- Я -->
+    <section class="view" data-view="me" hidden>
+      <div class="panel norm" id="normBox"></div>
+      <form class="panel form" id="profForm">
+        <h2>Параметры</h2>
+        <div class="seg seg--sex" id="sexSeg">
+          <button type="button" data-v="м" aria-pressed="true">Мужчина</button>
+          <button type="button" data-v="ж" aria-pressed="false">Женщина</button>
+        </div>
+        <div class="grid3">
+          <label><span>Возраст</span><input name="age" type="number" inputmode="numeric" min="10" max="100"></label>
+          <label><span>Рост, см</span><input name="height" type="number" inputmode="numeric" min="100" max="230"></label>
+          <label><span>Вес, кг</span><input name="weight" type="number" inputmode="decimal" step="0.1" min="30" max="250"></label>
+        </div>
+        <label><span>Активность</span>
+          <select name="activity">
+            <option value="1.2">Сидячая, без тренировок</option>
+            <option value="1.375">1–3 тренировки в неделю</option>
+            <option value="1.55">3–5 тренировок в неделю</option>
+            <option value="1.725">Каждый день / физическая работа</option>
+          </select>
+        </label>
+        <div class="seg seg--goal" id="goalSeg">
+          <button type="button" data-v="похудение" aria-pressed="false">Сбросить</button>
+          <button type="button" data-v="поддержание" aria-pressed="true">Держать</button>
+          <button type="button" data-v="набор" aria-pressed="false">Набрать</button>
+        </div>
+        <label><span>Своя норма ккал <small>(необязательно)</small></span><input name="kcalManual" type="number" inputmode="numeric" placeholder="посчитать самой формулой"></label>
+        <button class="btn btn--main" type="submit" id="profBtn">Сохранить</button>
+        <p class="res" id="profRes" role="status"></p>
+      </form>
+      <div class="panel">
+        <h2>Что говорить кнопке</h2>
+        <ul class="say">
+          <li>«Два яйца, тост с маслом и кофе с молоком»</li>
+          <li>«На обед борщ и котлета с пюре»</li>
+          <li>«Нет, пюре было 150 грамм» · «удали последнее»</li>
+          <li>«Сколько осталось белка?» · «Что съесть на ужин?»</li>
+          <li>«Вешу 82 и 4»</li>
+          <li>«Запомни: мой протеин, скуп — 120 ккал, 24 белка, 2 жира, 3 углевода»</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <div class="dock">
+    <button class="btn btn--ghost" id="askBtn">Что съесть?</button>
+    <button class="btn btn--main dock__add" id="addBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Записать еду</button>
+  </div>
+</div>
+
+<div class="veil" id="veil" hidden></div>
+
+<section class="sheet" id="addSheet" role="dialog" aria-modal="true" aria-labelledby="addT" hidden>
+  <div class="sheet__grab"></div>
+  <h2 id="addT">Что съел?</h2>
+  <p class="muted small">Как голосом — можно надиктовать микрофоном на клавиатуре.</p>
+  <form id="addForm">
+    <textarea id="addText" rows="3" placeholder="Овсянка на молоке и банан" required></textarea>
+    <div class="chips" id="chips"></div>
+    <button class="btn btn--main" type="submit" id="addGo">Посчитать и записать</button>
+  </form>
+  <p class="res" id="addRes" role="status"></p>
+</section>
+
+<section class="sheet" id="askSheet" role="dialog" aria-modal="true" aria-labelledby="askT" hidden>
+  <div class="sheet__grab"></div>
+  <h2 id="askT">Совет диетолога</h2>
+  <form id="askForm">
+    <input id="askText" placeholder="Что съесть на ужин?">
+    <button class="btn btn--main" type="submit" id="askGo">Спросить</button>
+  </form>
+  <p class="res res--advice" id="askRes" role="status"></p>
+</section>
+
+<section class="sheet" id="itemSheet" role="dialog" aria-modal="true" aria-labelledby="itT" hidden>
+  <div class="sheet__grab"></div>
+  <h2 id="itT">Запись</h2>
+  <div class="iteminfo" id="itemInfo"></div>
+  <button class="btn btn--danger" id="delBtn">Удалить</button>
+  <button class="btn btn--plain" data-close>Отмена</button>
+  <p class="res" id="itemRes" role="status"></p>
+</section>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>

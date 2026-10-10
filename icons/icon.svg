@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF9A4D"/><stop offset=".55" stop-color="#F45E1C"/><stop offset="1" stop-color="#D93E12"/>
+    </linearGradient>
+    <radialGradient id="plate" cx=".45" cy=".4" r=".7">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F6E9DC"/>
+    </radialGradient>
+    <radialGradient id="flesh" cx=".42" cy=".55" r=".65">
+      <stop offset="0" stop-color="#F3F2A2"/><stop offset=".55" stop-color="#C9DE6A"/><stop offset="1" stop-color="#8DBE3E"/>
+    </radialGradient>
+    <radialGradient id="pit" cx=".35" cy=".3" r=".75">
+      <stop offset="0" stop-color="#B9774A"/><stop offset=".6" stop-color="#8A4B25"/><stop offset="1" stop-color="#5E2F14"/>
+    </radialGradient>
+    <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="22" stdDeviation="26" flood-color="#7A2306" flood-opacity=".38"/></filter>
+    <filter id="sh2" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="6" dy="14" stdDeviation="12" flood-color="#5A3A10" flood-opacity=".28"/></filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <!-- блик фона -->
+  <circle cx="200" cy="160" r="340" fill="#FFFFFF" opacity=".07"/>
+  <!-- тарелка -->
+  <g filter="url(#sh)">
+    <circle cx="540" cy="560" r="330" fill="url(#plate)"/>
+  </g>
+  <circle cx="540" cy="560" r="250" fill="none" stroke="#EBD7C4" stroke-width="6"/>
+  <!-- вилка -->
+  <g transform="translate(178 545) rotate(-8) scale(.92)" filter="url(#sh2)">
+    <rect x="-18" y="-60" width="36" height="380" rx="18" fill="#FFF7EE"/>
+    <path d="M-62 -330 v170 a62 62 0 0 0 124 0 v-170" fill="none" stroke="#FFF7EE" stroke-width="22" stroke-linecap="round"/>
+    <path d="M-20 -330 v150 M20 -330 v150" stroke="#FFF7EE" stroke-width="20" stroke-linecap="round"/>
+    <rect x="-24" y="-110" width="48" height="80" rx="20" fill="#FFF7EE"/>
+  </g>
+  <!-- авокадо -->
+  <g transform="translate(560 575) rotate(28)" filter="url(#sh2)">
+    <path d="M0 -230 C 95 -230 150 -150 160 -60 C 175 60 150 210 0 230 C -150 210 -175 60 -160 -60 C -150 -150 -95 -230 0 -230 Z" fill="#2F5A1E"/>
+    <path d="M0 -205 C 82 -205 128 -138 137 -58 C 150 52 128 188 0 206 C -128 188 -150 52 -137 -58 C -128 -138 -82 -205 0 -205 Z" fill="url(#flesh)"/>
+    <circle cx="0" cy="55" r="88" fill="url(#pit)"/>
+    <ellipse cx="-30" cy="22" rx="26" ry="16" fill="#FFFFFF" opacity=".35" transform="rotate(-30 -30 22)"/>
+  </g>
+  <!-- листик-звёздочка -->
+  <circle cx="820" cy="250" r="16" fill="#FFF3E6" opacity=".9"/>
+  <circle cx="870" cy="320" r="9" fill="#FFF3E6" opacity=".7"/>
+</svg>
