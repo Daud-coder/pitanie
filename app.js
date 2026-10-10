@@ -110,17 +110,14 @@
     if (a <= 0) return '';
     return '<circle class="' + (cls || '') + '" cx="100" cy="100" r="' + r + '" stroke-width="' + w + '" stroke="' + color + '" stroke-dasharray="' + (a * len) + ' ' + len + '" stroke-dashoffset="' + (-from * len) + '"/>';
   }
+  /* Кольцо: зелёное — сколько ещё можно, красное — сколько съедено. Перебор — тёмно-красная дуга поверх. */
   function renderRing(t, n) {
     var css = getComputedStyle(document.documentElement), col = function (v) { return css.getPropertyValue(v).trim(); };
-    var parts = [t.p * 4, t.f * 9, t.c * 4], sumK = parts[0] + parts[1] + parts[2] || 1;
-    var fill = n ? Math.min(1, t.kcal / n.kcal) : (t.kcal ? 1 : 0);
-    var gap = fill > 0.05 ? 0.006 : 0, pos = 0, svg = '<circle class="bgc" cx="100" cy="100" r="80" stroke-width="22"/>';
-    MAC.forEach(function (m, i) {
-      var len = fill * parts[i] / sumK;
-      svg += arc(80, 22, pos, pos + len - gap, col(m[2]), 'seg');
-      pos += len;
-    });
-    if (n && t.kcal > n.kcal) svg += arc(96, 6, 0, Math.min(1, (t.kcal - n.kcal) / n.kcal), col('--over'), 'seg');
+    var eaten = n ? Math.min(1, t.kcal / n.kcal) : 0, gap = eaten > 0 && eaten < 1 ? 0.008 : 0;
+    var svg = n
+      ? arc(80, 22, eaten + gap, 1 - gap, col('--ok'), 'seg') + arc(80, 22, 0, eaten, col('--eat'), 'seg')
+      : '<circle class="bgc" cx="100" cy="100" r="80" stroke-width="22"/>';
+    if (n && t.kcal > n.kcal) svg += arc(80, 22, 0, Math.min(1, (t.kcal - n.kcal) / n.kcal), col('--over'), 'seg seg--over');
     $('#rings').innerHTML = svg;
   }
 
@@ -145,6 +142,7 @@
       $('#kLeft').innerHTML = left >= 0 ? (isToday ? 'Осталось ' : 'Не добрал ') + '<b>' + num(left) + ' ккал</b>' : 'Перебор <b>' + num(-left) + ' ккал</b>';
     }
     $('#normCta').hidden = !!n;
+    $('#ringKey').hidden = !n;
     var sumK = t.p * 4 + t.f * 9 + t.c * 4 || 1;
     $('#macros').innerHTML = MAC.map(function (m, i) {
       var have = Math.round(t[m[0]]), need = n ? n[m[0]] : 0, kk = [4, 9, 4][i];

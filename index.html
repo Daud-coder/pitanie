@@ -61,6 +61,7 @@
           </div>
         </div>
         <p class="left" id="kLeft"></p>
+        <p class="ringkey" id="ringKey" hidden><span class="k-eat">съедено</span><span class="k-ok">осталось</span></p>
         <button class="normcta" id="normCta" hidden>Норма на день не задана — <b>заполнить профиль</b></button>
         <ul class="mtiles" id="macros"></ul>
       </div>
@@ -126,7 +127,7 @@
           <button type="button" data-v="поддержание" aria-pressed="true">Держать</button>
           <button type="button" data-v="набор" aria-pressed="false">Набрать</button>
         </div>
-        <label><span>Своя норма ккал <small>(необязательно)</small></span><input name="kcalManual" type="number" inputmode="numeric" placeholder="посчитать самой формулой"></label>
+        <label><span>Своя норма ккал <small>(необязательно)</small></span><input name="kcalManual" type="number" inputmode="numeric" min="1000" max="6000" step="10" placeholder="пусто — посчитать формулой"></label>
         <button class="btn btn--main" type="submit" id="profBtn">Сохранить</button>
         <p class="res" id="profRes" role="status"></p>
       </form>
