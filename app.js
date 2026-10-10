@@ -111,8 +111,8 @@
       var d = addDays(today, k), t = total(itemsOf(d)), dt = dateOf(d), norm = normFor(d);
       var pct = norm ? Math.min(100, t.kcal / norm.kcal * 100) : (t.kcal ? 100 : 0);
       var over = norm && t.kcal > norm.kcal * 1.05;
-      html += '<button class="dayb" data-d="' + d + '" aria-pressed="' + (d === state.day) + '" aria-label="' + dt.getDate() + ' ' + MON[dt.getMonth()] + '">' +
-        '<small>' + (k === 0 ? 'сег' : WD[dt.getDay()]) + '</small><b>' + dt.getDate() + '</b><i class="' + (over ? 'over' : '') + '"><u style="width:' + pct + '%"></u></i></button>';
+      html += '<button class="dayb' + (k === 0 ? ' dayb--today' : '') + '" data-d="' + d + '" aria-pressed="' + (d === state.day) + '" aria-label="' + dt.getDate() + ' ' + MON[dt.getMonth()] + '">' +
+        '<small>' + WD[dt.getDay()] + '</small><b>' + dt.getDate() + '</b><i class="' + (over ? 'over' : '') + '"><u style="width:' + pct + '%"></u></i></button>';
     }
     $('#strip').innerHTML = html;
   }

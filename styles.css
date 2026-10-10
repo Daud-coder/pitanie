@@ -118,6 +118,9 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .dayb i u { display: block; height: 100%; background: var(--accent); }
 .dayb i.over u { background: var(--over); }
 .dayb[aria-pressed="true"] { background: var(--ink); }
+.dayb { position: relative; }
+.dayb--today::before { content: ''; position: absolute; top: 3px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--accent); }
+.dayb--today:not([aria-pressed="true"]) small { color: var(--accent); }
 .dayb[aria-pressed="true"] small, .dayb[aria-pressed="true"] b { color: var(--bg); }
 
 /* ---------- кольцо ---------- */
