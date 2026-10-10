@@ -154,17 +154,19 @@
       $('#aStepsBar').style.width = Math.min(100, a.steps / 100) + '%'; // цель 10 000
     }
     renderRing(t, n);
-    // с нормой в центре — сколько процентов нормы съедено; сами ккал — в плитках ниже
-    $('#kEatenL').textContent = n ? 'съедено' : 'съедено';
-    $('#kEaten').textContent = n ? Math.round(t.kcal / n.kcal * 100) + '%' : num(t.kcal);
-    $('#kOf').textContent = n ? 'нормы ' + num(n.kcal) + ' ккал' : 'ккал';
+    // центр кольца: главное — сколько осталось, ниже норма, мелко — процент
     var left = n ? n.kcal - Math.round(t.kcal) : null;
+    var over = left !== null && left < 0;
+    $('#kEatenL').textContent = n ? (over ? 'перебор' : isToday ? 'осталось' : 'не добрал') : 'съедено';
+    $('#kEaten').textContent = n ? num(Math.abs(left)) : num(t.kcal);
+    $('#kEaten').className = over ? 'over' : n ? 'ok' : '';
+    $('#kOf').textContent = n ? 'норма ' + num(n.kcal) + ' ккал' : 'ккал';
+    $('#kPct').textContent = n ? Math.round(t.kcal / n.kcal * 100) + '% съедено' : '';
     $('#split').hidden = !n;
     if (n) {
       $('#sEat').textContent = num(t.kcal);
-      $('#sOk').textContent = num(Math.abs(left));
-      $('#sOkL').textContent = left >= 0 ? (isToday ? 'Осталось' : 'Не добрал') : 'Перебор';
-      $('#sOkBox').className = 'split__c ' + (left >= 0 ? 'split__c--ok' : 'split__c--over');
+      $('#sNorm').textContent = num(n.kcal);
+      $('#sNormL').textContent = n.bonus ? 'Норма +' + n.bonus + ' за активность' : 'Норма';
     }
     $('#normCta').hidden = !!n;
     var sumK = t.p * 4 + t.f * 9 + t.c * 4 || 1;
