@@ -403,7 +403,16 @@
 
   document.addEventListener('visibilitychange', function () { if (!document.hidden && state.pin) refresh(true); });
 
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    // вышла новая версия — новый service worker берёт управление, перезагружаемся один раз
+    var hadController = !!navigator.serviceWorker.controller, reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (hadController && !reloaded) { reloaded = true; location.reload(); }
+    });
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (reg) {
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) reg.update().catch(function () {}); });
+    }).catch(function () {});
+  }
 
   if (!state.pin) showLock();
   else { if (state.data) state.day = state.data.today; start(); refresh(); }
