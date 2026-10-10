@@ -127,6 +127,7 @@
           <button type="button" data-v="поддержание" aria-pressed="true">Держать</button>
           <button type="button" data-v="набор" aria-pressed="false">Набрать</button>
         </div>
+        <label><span>Желаемый вес, кг <small>(при похудении белок и жиры считаются от него)</small></span><input name="target" type="number" inputmode="decimal" step="0.5" min="30" max="250"></label>
         <label><span>Своя норма ккал <small>(необязательно)</small></span><input name="kcalManual" type="number" inputmode="numeric" min="1000" max="6000" step="10" placeholder="пусто — посчитать формулой"></label>
         <button class="btn btn--main" type="submit" id="profBtn">Сохранить</button>
         <p class="res" id="profRes" role="status"></p>

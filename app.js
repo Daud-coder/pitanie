@@ -241,7 +241,7 @@
         MAC.map(function (m) { return '<div><span>' + m[1] + '</span><strong>' + n[m[0]] + ' г</strong></div>'; }).join('') + '</div>'
       : '<small>Норма ещё не посчитана</small><b>Заполни параметры</b>';
     if (document.activeElement && f.contains(document.activeElement)) return;
-    ['age', 'height', 'weight', 'kcalManual'].forEach(function (k) { f.elements[k].value = p[k] || ''; });
+    ['age', 'height', 'weight', 'target', 'kcalManual'].forEach(function (k) { f.elements[k].value = p[k] || ''; });
     f.elements.activity.value = String(p.activity || '1.375');
     pick('#sexSeg', /^ж/i.test(p.sex || '') ? 'ж' : 'м');
     pick('#goalSeg', p.goal || 'поддержание');
@@ -349,7 +349,7 @@
     var f = e.target, btn = $('#profBtn');
     var profile = { sex: picked('#sexSeg'), goal: picked('#goalSeg'), activity: Number(f.elements.activity.value),
       age: Number(f.elements.age.value) || '', height: Number(f.elements.height.value) || '',
-      weight: Number(String(f.elements.weight.value).replace(',', '.')) || '', kcalManual: Number(f.elements.kcalManual.value) || '' };
+      weight: Number(String(f.elements.weight.value).replace(',', '.')) || '', kcalManual: Number(f.elements.kcalManual.value) || '', target: Number(String(f.elements.target.value).replace(',', '.')) || '' };
     btn.disabled = true; $('#profRes').textContent = '';
     api('profile', { profile: profile }).then(function (res) {
       if (!res.ok) throw new Error(res.message);
