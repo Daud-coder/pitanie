@@ -84,7 +84,10 @@
 
   /* Активность из «Здоровья» (команда «Питание ⇄ Здоровье»). Бонус к норме — как на сервере:
      половина сожжённого сверх 600 ккал; обычные тренировки уже в коэффициенте активности. */
-  function actOf(day) { return (state.data.activity || []).find(function (a) { return a.date === day; }) || null; }
+  function actOf(day) {
+    var a = (state.data.activity || []).find(function (x) { return x.date === day; }) || null;
+    return a && a.kcal > 6000 ? Object.assign({}, a, { kcal: 0 }) : a; // защита от сбоя единиц
+  }
   function normFor(day) {
     var n = state.data.norm, a = actOf(day);
     if (!n) return null;
@@ -125,7 +128,7 @@
     var css = getComputedStyle(document.documentElement), col = function (v) { return css.getPropertyValue(v).trim(); };
     var eaten = n ? Math.min(1, t.kcal / n.kcal) : 0, gap = eaten > 0 && eaten < 1 ? 0.008 : 0;
     var svg = n
-      ? arc(80, 22, eaten + gap, 1 - gap, col('--ok'), 'seg') + arc(80, 22, 0, eaten, col('--eat'), 'seg')
+      ? arc(80, 22, eaten + gap, 1 - gap, col('--ok'), 'seg') + arc(80, 22, 0, eaten, col('--eat'), 'seg seg--eat')
       : '<circle class="bgc" cx="100" cy="100" r="80" stroke-width="22"/>';
     if (n && t.kcal > n.kcal) svg += arc(80, 22, 0, Math.min(1, (t.kcal - n.kcal) / n.kcal), col('--over'), 'seg seg--over');
     $('#rings').innerHTML = svg;
@@ -144,18 +147,26 @@
     var list = itemsOf(state.day), t = total(list), n = normFor(state.day), isToday = state.day === state.data.today;
     var a = actOf(state.day);
     $('#act').hidden = !a;
-    if (a) $('#act').innerHTML = '<span>Сожжено <b>' + num(a.kcal) + ' ккал</b></span><span><b>' + num(a.steps) + '</b> шагов</span>' + (n && n.bonus ? '<span class="act__bonus">+' + n.bonus + ' к норме</span>' : '');
+    if (a) {
+      $('#aKcal').textContent = num(a.kcal) + ' ккал';
+      $('#aBonus').textContent = n && n.bonus ? '+' + n.bonus + ' ккал к норме' : '';
+      $('#aSteps').textContent = num(a.steps);
+      $('#aStepsBar').style.width = Math.min(100, a.steps / 100) + '%'; // цель 10 000
+    }
     renderRing(t, n);
-    $('#kEaten').textContent = num(t.kcal);
-    $('#kOf').textContent = n ? 'из ' + num(n.kcal) + ' ккал' : 'ккал';
+    // с нормой в центре — сколько процентов нормы съедено; сами ккал — в плитках ниже
+    $('#kEatenL').textContent = n ? 'съедено' : 'съедено';
+    $('#kEaten').textContent = n ? Math.round(t.kcal / n.kcal * 100) + '%' : num(t.kcal);
+    $('#kOf').textContent = n ? 'нормы ' + num(n.kcal) + ' ккал' : 'ккал';
     var left = n ? n.kcal - Math.round(t.kcal) : null;
-    $('#kLeft').hidden = !n;
+    $('#split').hidden = !n;
     if (n) {
-      $('#kLeft').className = 'left' + (left < 0 ? ' left--over' : '');
-      $('#kLeft').innerHTML = left >= 0 ? (isToday ? 'Осталось ' : 'Не добрал ') + '<b>' + num(left) + ' ккал</b>' : 'Перебор <b>' + num(-left) + ' ккал</b>';
+      $('#sEat').textContent = num(t.kcal);
+      $('#sOk').textContent = num(Math.abs(left));
+      $('#sOkL').textContent = left >= 0 ? (isToday ? 'Осталось' : 'Не добрал') : 'Перебор';
+      $('#sOkBox').className = 'split__c ' + (left >= 0 ? 'split__c--ok' : 'split__c--over');
     }
     $('#normCta').hidden = !!n;
-    $('#ringKey').hidden = !n;
     var sumK = t.p * 4 + t.f * 9 + t.c * 4 || 1;
     $('#macros').innerHTML = MAC.map(function (m, i) {
       var have = Math.round(t[m[0]]), need = n ? n[m[0]] : 0, kk = [4, 9, 4][i];

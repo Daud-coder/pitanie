@@ -55,16 +55,28 @@
         <div class="rings">
           <svg viewBox="0 0 200 200" id="rings" aria-hidden="true"></svg>
           <div class="rings__c">
-            <small>съедено</small>
+            <small id="kEatenL">съедено</small>
             <b id="kEaten">0</b>
             <span id="kOf">ккал</span>
           </div>
         </div>
-        <p class="left" id="kLeft"></p>
-        <p class="act" id="act" hidden></p>
-        <p class="ringkey" id="ringKey" hidden><span class="k-eat">съедено</span><span class="k-ok">осталось</span></p>
+        <div class="split" id="split" hidden>
+          <div class="split__c split__c--eat"><span>Съедено</span><b id="sEat">0</b><small>ккал</small></div>
+          <div class="split__c split__c--ok" id="sOkBox"><span id="sOkL">Осталось</span><b id="sOk">0</b><small>ккал</small></div>
+        </div>
         <button class="normcta" id="normCta" hidden>Норма на день не задана — <b>заполнить профиль</b></button>
         <ul class="mtiles" id="macros"></ul>
+      </div>
+
+      <div class="actcard" id="act" hidden>
+        <div class="actcard__t">
+          <i class="actcard__ic actcard__ic--fire"><svg viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.4 1.3-3.8 2.4-5 .3 1.6 1 2.6 2 3-.4-3.3-.2-5.5.6-8z"/></svg></i>
+          <div><span>Сожжено активностью</span><b id="aKcal">0</b><small id="aBonus"></small></div>
+        </div>
+        <div class="actcard__t">
+          <i class="actcard__ic actcard__ic--steps"><svg viewBox="0 0 24 24"><path d="M8 4c1.7 0 2.5 1.8 2.5 4S9.6 12 8 12 5.5 10.2 5.5 8 6.3 4 8 4zM6 14.5h4V16a2 2 0 0 1-4 0zM16 8c1.7 0 2.5 1.8 2.5 4s-.9 4-2.5 4-2.5-1.8-2.5-4S14.3 8 16 8zm-2 10.5h4V20a2 2 0 0 1-4 0z"/></svg></i>
+          <div><span>Шаги <em>из 10&nbsp;000</em></span><b id="aSteps">0</b><div class="bar bar--steps"><u id="aStepsBar"></u></div></div>
+        </div>
       </div>
 
       <p class="tip" id="tip" hidden></p>
