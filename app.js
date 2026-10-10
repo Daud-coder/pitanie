@@ -82,6 +82,16 @@
     return list.reduce(function (t, i) { t.kcal += i.kcal; t.p += i.p; t.f += i.f; t.c += i.c; return t; }, { kcal: 0, p: 0, f: 0, c: 0 });
   }
 
+  /* Активность из «Здоровья» (команда «Питание ⇄ Здоровье»). Бонус к норме — как на сервере:
+     половина сожжённого сверх 600 ккал; обычные тренировки уже в коэффициенте активности. */
+  function actOf(day) { return (state.data.activity || []).find(function (a) { return a.date === day; }) || null; }
+  function normFor(day) {
+    var n = state.data.norm, a = actOf(day);
+    if (!n) return null;
+    var bonus = a && a.kcal > 600 ? Math.round((a.kcal - 600) / 2 / 10) * 10 : 0;
+    return bonus ? Object.assign({}, n, { kcal: n.kcal + bonus, c: n.c + Math.round(bonus / 4), bonus: bonus }) : n;
+  }
+
   /* ---------- отрисовка ---------- */
   function render() {
     if (!state.data) return;
@@ -93,9 +103,9 @@
   }
 
   function renderStrip() {
-    var norm = state.data.norm, today = state.data.today, html = '';
+    var today = state.data.today, html = '';
     for (var k = -6; k <= 0; k++) {
-      var d = addDays(today, k), t = total(itemsOf(d)), dt = dateOf(d);
+      var d = addDays(today, k), t = total(itemsOf(d)), dt = dateOf(d), norm = normFor(d);
       var pct = norm ? Math.min(100, t.kcal / norm.kcal * 100) : (t.kcal ? 100 : 0);
       var over = norm && t.kcal > norm.kcal * 1.05;
       html += '<button class="dayb" data-d="' + d + '" aria-pressed="' + (d === state.day) + '" aria-label="' + dt.getDate() + ' ' + MON[dt.getMonth()] + '">' +
@@ -131,7 +141,10 @@
 
   function renderDay() {
     renderStrip();
-    var list = itemsOf(state.day), t = total(list), n = state.data.norm, isToday = state.day === state.data.today;
+    var list = itemsOf(state.day), t = total(list), n = normFor(state.day), isToday = state.day === state.data.today;
+    var a = actOf(state.day);
+    $('#act').hidden = !a;
+    if (a) $('#act').innerHTML = '<span>Сожжено <b>' + num(a.kcal) + ' ккал</b></span><span><b>' + num(a.steps) + '</b> шагов</span>' + (n && n.bonus ? '<span class="act__bonus">+' + n.bonus + ' к норме</span>' : '');
     renderRing(t, n);
     $('#kEaten').textContent = num(t.kcal);
     $('#kOf').textContent = n ? 'из ' + num(n.kcal) + ' ккал' : 'ккал';
@@ -198,7 +211,7 @@
   function renderTrend() {
     $$('#range button').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.r === state.range)); });
     var n = state.data.norm, today = state.data.today, days = [];
-    for (var k = -(state.range - 1); k <= 0; k++) { var d = addDays(today, k); days.push({ d: d, t: total(itemsOf(d)) }); }
+    for (var k = -(state.range - 1); k <= 0; k++) { var d = addDays(today, k); days.push({ d: d, t: total(itemsOf(d)), a: actOf(d) }); }
     var max = Math.max(n ? n.kcal * 1.2 : 0, Math.max.apply(null, days.map(function (x) { return x.t.kcal; })), 500);
     var html = days.map(function (x, i) {
       var h = x.t.kcal / max * 100, dt = dateOf(x.d);
@@ -217,7 +230,22 @@
       return '<li style="--dot:var(' + m[2] + ')"><span>' + m[1] + '</span><em>' + have + (need ? ' / ' + need + ' г · ' + Math.round(have / need * 100) + '%' : ' г') + '</em>' +
         '<div class="bar"><u style="width:' + (need ? Math.min(100, have / need * 100) : 0) + '%"></u></div></li>';
     }).join('');
+    renderActivity(days);
     renderWeight();
+  }
+
+  function renderActivity(days) {
+    var has = days.filter(function (x) { return x.a; });
+    $('#actPanel').hidden = !has.length;
+    if (!has.length) return;
+    var max = Math.max.apply(null, has.map(function (x) { return x.a.kcal; }).concat([300]));
+    $('#actCols').innerHTML = days.map(function (x, i) {
+      var v = x.a ? x.a.kcal : 0, dt = dateOf(x.d);
+      var showLbl = state.range <= 14 || i % 3 === (days.length - 1) % 3;
+      return '<div class="col" title="' + dt.getDate() + ' ' + MON[dt.getMonth()] + ': ' + num(v) + ' ккал, ' + num(x.a ? x.a.steps : 0) + ' шагов"><i class="act' + (v ? '' : ' zero') + '" style="height:calc(' + (v / max * 100) + '% - 17px)"></i><small>' + (showLbl ? dt.getDate() : '') + '</small></div>';
+    }).join('');
+    var avgK = has.reduce(function (s, x) { return s + x.a.kcal; }, 0) / has.length, avgS = has.reduce(function (s, x) { return s + x.a.steps; }, 0) / has.length;
+    $('#actAvg').textContent = 'ср. ' + num(avgK) + ' ккал · ' + (avgS >= 1000 ? (Math.round(avgS / 100) / 10).toString().replace('.', ',') + ' тыс.' : num(avgS)) + ' шагов';
   }
 
   function renderWeight() {
