@@ -51,22 +51,27 @@
     <section class="view" data-view="day">
       <div class="strip" id="strip" aria-label="Дни"></div>
 
-      <div class="ringcard">
+      <div class="hero">
         <div class="rings">
           <svg viewBox="0 0 200 200" id="rings" aria-hidden="true"></svg>
           <div class="rings__c">
-            <b id="kLeft">—</b>
-            <span id="kLeftL">осталось ккал</span>
+            <small>съедено</small>
+            <b id="kEaten">0</b>
+            <span id="kOf">ккал</span>
           </div>
         </div>
-        <div class="ringcard__side">
-          <div class="kpair"><span>Съедено</span><b id="kEaten">0</b></div>
-          <div class="kpair"><span>Норма</span><b id="kNorm">—</b></div>
-          <ul class="macros" id="macros"></ul>
-        </div>
+        <p class="left" id="kLeft"></p>
+        <button class="normcta" id="normCta" hidden>Норма на день не задана — <b>заполнить профиль</b></button>
+        <ul class="mtiles" id="macros"></ul>
       </div>
 
       <p class="tip" id="tip" hidden></p>
+
+      <div class="panel dayparts" id="dayparts" hidden>
+        <div class="panel__h"><h2>По приёмам пищи</h2><span id="dpNote"></span></div>
+        <div class="dpbar" id="dpbar"></div>
+        <ul class="dplegend" id="dplegend"></ul>
+      </div>
 
       <div id="meals"></div>
     </section>

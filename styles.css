@@ -13,6 +13,10 @@
   --f: #E9A91F;   /* жиры */
   --c: #3B8E86;   /* углеводы */
   --over: #C7312B;
+  --m1: #F2A93B;  /* завтрак */
+  --m2: #EE6A3C;  /* обед */
+  --m3: #7DAE4A;  /* перекус */
+  --m4: #6C63C9;  /* ужин */
   --shadow: 0 1px 1px rgba(80, 40, 10, .04), 0 10px 30px -12px rgba(120, 60, 20, .18);
   --display: 'Unbounded', 'Onest', system-ui, sans-serif;
   --font: 'Onest', -apple-system, system-ui, sans-serif;
@@ -33,6 +37,10 @@
     --f: #F5C04C;
     --c: #5CC0B5;
     --over: #FF6B5E;
+    --m1: #F5B851;
+    --m2: #FF8458;
+    --m3: #93C863;
+    --m4: #8E86F0;
     --shadow: none;
     color-scheme: dark;
   }
@@ -107,43 +115,60 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .dayb[aria-pressed="true"] { background: var(--ink); }
 .dayb[aria-pressed="true"] small, .dayb[aria-pressed="true"] b { color: var(--bg); }
 
-/* ---------- кольца ---------- */
-.ringcard { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 14px; align-items: center; background: var(--card); border-radius: 30px; padding: 16px; box-shadow: var(--shadow); }
-.rings { position: relative; aspect-ratio: 1; }
-.rings svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.rings circle { fill: none; stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.2, .8, .3, 1); }
+/* ---------- кольцо ---------- */
+.hero { background: var(--card); border-radius: 30px; padding: 18px 16px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.rings { position: relative; width: min(232px, 66vw); aspect-ratio: 1; }
+.rings svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.rings circle { fill: none; }
 .rings .bgc { stroke: var(--bg-2); }
+.rings .seg { animation: draw .9s cubic-bezier(.2, .8, .3, 1) both; }
+@keyframes draw { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .rings .seg { animation: none; } }
 .rings__c { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
-.rings__c b { font: 800 30px/1 var(--display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.rings__c b.over { color: var(--over); }
-.rings__c span { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 4px; }
-.ringcard__side { display: flex; flex-direction: column; gap: 10px; }
-.kpair { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
-.kpair span { font-size: 13px; color: var(--muted); font-weight: 600; }
-.kpair b { font: 700 17px/1 var(--display); font-variant-numeric: tabular-nums; }
-.macros { display: flex; flex-direction: column; gap: 8px; border-top: 1.5px dashed var(--line); padding-top: 10px; }
-.macros li { display: grid; grid-template-columns: 1fr auto; gap: 3px 6px; font-size: 13px; }
-.macros li span { font-weight: 700; display: flex; align-items: center; gap: 6px; }
-.macros li span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); }
-.macros li em { font-style: normal; color: var(--muted); font-variant-numeric: tabular-nums; }
-.macros li em b { color: var(--ink); }
-.bar { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--bg-2); overflow: hidden; }
+.rings__c small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.rings__c b { font: 800 40px/1.05 var(--display); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.rings__c span { font-size: 14px; color: var(--muted); font-weight: 700; margin-top: 2px; }
+.left { font-size: 15px; font-weight: 600; background: var(--accent-soft); padding: 7px 14px; border-radius: 999px; }
+.left b { font-weight: 800; }
+.left--over { background: color-mix(in srgb, var(--over) 16%, transparent); color: var(--over); }
+.normcta { width: 100%; background: var(--ink); color: var(--bg); border-radius: 18px; padding: 12px 14px; font-size: 15px; font-weight: 600; text-align: center; }
+.normcta b { color: var(--accent); }
+.mtiles { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.mtiles li { background: var(--bg); border-radius: 18px; padding: 10px 10px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.mtiles li span { font-size: 12px; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.mtiles li span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); flex: none; }
+.mtiles li b { font: 700 19px/1.1 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mtiles li b small { font: 600 12px var(--font); color: var(--muted); }
+.mtiles li em { font-style: normal; font-size: 11px; color: var(--muted); line-height: 1.3; }
+.bar { height: 6px; border-radius: 3px; background: var(--bg-2); overflow: hidden; }
 .bar u { display: block; height: 100%; border-radius: 3px; background: var(--dot); transition: width .7s cubic-bezier(.2, .8, .3, 1); }
 
 .tip { background: var(--accent-soft); border-radius: 20px; padding: 12px 14px; font-size: 15px; font-weight: 600; }
 
 /* ---------- приёмы пищи ---------- */
-#meals { display: flex; flex-direction: column; gap: 12px; }
-.meal { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; }
-.meal__h { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 16px 6px; }
-.meal__h h3 { margin: 0; font: 700 15px/1.2 var(--display); }
-.meal__h span { font-size: 14px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
-.item { width: 100%; text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 10px 16px; border-top: 1px solid var(--line); }
-.item:first-of-type { border-top: 0; }
+.dpbar { display: flex; gap: 3px; height: 14px; border-radius: 7px; background: var(--bg-2); overflow: hidden; }
+.dpbar i { display: block; height: 100%; border-radius: 4px; }
+.dplegend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; margin-top: 12px; }
+.dplegend li { display: grid; grid-template-columns: 10px 1fr auto auto; gap: 8px; align-items: center; font-size: 14px; }
+.dplegend li::before { content: ''; width: 10px; height: 10px; border-radius: 3px; background: var(--mc); }
+.dplegend b { font-variant-numeric: tabular-nums; }
+.dplegend small { color: var(--muted); font-size: 12px; min-width: 30px; text-align: right; }
+
+#meals { display: flex; flex-direction: column; gap: 14px; }
+.meal { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; border-top: 5px solid var(--mc); }
+.meal__h { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 14px 16px 4px; background: linear-gradient(to bottom, color-mix(in srgb, var(--mc) 14%, transparent), transparent); }
+.meal__ic { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: var(--mc); color: #fff; }
+.meal__ic svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.meal__h h3 { margin: 0; font: 700 16px/1.2 var(--display); }
+.meal__h small { font-size: 12px; color: var(--muted); }
+.meal__k { text-align: right; }
+.meal__k b { display: block; font: 800 20px/1 var(--display); color: var(--mc); font-variant-numeric: tabular-nums; }
+.meal__k small { font-size: 11px; color: var(--muted); font-weight: 600; }
+.meal__m { display: flex; gap: 12px; padding: 4px 16px 10px 70px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.item { width: 100%; text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 11px 16px 11px 70px; border-top: 1px solid var(--line); }
 .item b { font-size: 15px; font-weight: 600; }
 .item strong { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .item small { grid-column: 1 / -1; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.item small i { font-style: normal; font-weight: 700; }
 .empty { text-align: center; padding: 30px 10px; color: var(--muted); }
 .empty b { display: block; font: 700 17px/1.3 var(--display); color: var(--ink); margin-bottom: 6px; }
 
@@ -214,6 +239,6 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 
 @media (max-width: 360px) {
-  .ringcard { grid-template-columns: 1fr; }
-  .rings { max-width: 200px; margin: 0 auto; width: 100%; }
+  .mtiles li b { font-size: 16px; }
+  .item, .meal__m { padding-left: 16px; }
 }

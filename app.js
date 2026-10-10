@@ -104,54 +104,96 @@
     $('#strip').innerHTML = html;
   }
 
-  function ring(r, w, frac, color) {
-    var len = 2 * Math.PI * r, f = Math.max(0, Math.min(1, frac));
-    return '<circle class="bgc" cx="100" cy="100" r="' + r + '" stroke-width="' + w + '"/>' +
-      (f > 0 ? '<circle cx="100" cy="100" r="' + r + '" stroke-width="' + w + '" stroke="' + color + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + (len * (1 - f)) + '"/>' : '');
+  /* Кольцо: съеденное разбито по цветам — сколько ккал дали белки, жиры, углеводы; светлый остаток — сколько ещё можно. */
+  function arc(r, w, from, to, color, cls) {
+    var len = 2 * Math.PI * r, a = Math.max(0, to - from);
+    if (a <= 0) return '';
+    return '<circle class="' + (cls || '') + '" cx="100" cy="100" r="' + r + '" stroke-width="' + w + '" stroke="' + color + '" stroke-dasharray="' + (a * len) + ' ' + len + '" stroke-dashoffset="' + (-from * len) + '"/>';
   }
+  function renderRing(t, n) {
+    var css = getComputedStyle(document.documentElement), col = function (v) { return css.getPropertyValue(v).trim(); };
+    var parts = [t.p * 4, t.f * 9, t.c * 4], sumK = parts[0] + parts[1] + parts[2] || 1;
+    var fill = n ? Math.min(1, t.kcal / n.kcal) : (t.kcal ? 1 : 0);
+    var gap = fill > 0.05 ? 0.006 : 0, pos = 0, svg = '<circle class="bgc" cx="100" cy="100" r="80" stroke-width="22"/>';
+    MAC.forEach(function (m, i) {
+      var len = fill * parts[i] / sumK;
+      svg += arc(80, 22, pos, pos + len - gap, col(m[2]), 'seg');
+      pos += len;
+    });
+    if (n && t.kcal > n.kcal) svg += arc(96, 6, 0, Math.min(1, (t.kcal - n.kcal) / n.kcal), col('--over'), 'seg');
+    $('#rings').innerHTML = svg;
+  }
+
+  var MEAL_IC = {
+    'Завтрак': '<path d="M4 18h16M7 18a5 5 0 0 1 10 0M12 6v3M5.6 9.6l1.8 1.8M18.4 9.6l-1.8 1.8"/>',
+    'Обед': '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',
+    'Перекус': '<path d="M12 8c-3-2-7 0-7 4.5S8 21 10 21c1 0 1.4-.6 2-.6s1 .6 2 .6c2 0 5-4 5-8.5S15 6 12 8z"/><path d="M12 8c0-2 1-3.5 3-4"/>',
+    'Ужин': '<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/>'
+  };
+  var MEAL_COL = { 'Завтрак': '--m1', 'Обед': '--m2', 'Перекус': '--m3', 'Ужин': '--m4' };
 
   function renderDay() {
     renderStrip();
-    var list = itemsOf(state.day), t = total(list), n = state.data.norm;
-    var css = getComputedStyle(document.documentElement);
-    var col = function (v) { return css.getPropertyValue(v).trim(); };
-    $('#rings').innerHTML = ring(84, 22, n ? t.kcal / n.kcal : 0, t.kcal > (n ? n.kcal * 1.05 : Infinity) ? col('--over') : col('--accent'));
-
-    var left = n ? n.kcal - Math.round(t.kcal) : null;
-    $('#kLeft').textContent = n ? num(Math.abs(left)) : num(t.kcal);
-    $('#kLeft').className = left !== null && left < 0 ? 'over' : '';
-    $('#kLeftL').textContent = n ? (left < 0 ? 'ккал сверху' : 'осталось ккал') : 'ккал съедено';
+    var list = itemsOf(state.day), t = total(list), n = state.data.norm, isToday = state.day === state.data.today;
+    renderRing(t, n);
     $('#kEaten').textContent = num(t.kcal);
-    $('#kNorm').textContent = n ? num(n.kcal) : '—';
-    $('#macros').innerHTML = MAC.map(function (m) {
-      var have = Math.round(t[m[0]]), need = n ? n[m[0]] : 0;
-      return '<li style="--dot:var(' + m[2] + ')"><span>' + m[1] + '</span><em><b>' + have + '</b>' + (need ? ' / ' + need : '') + ' г</em>' +
-        '<div class="bar"><u style="width:' + (need ? Math.min(100, have / need * 100) : 0) + '%"></u></div></li>';
+    $('#kOf').textContent = n ? 'из ' + num(n.kcal) + ' ккал' : 'ккал';
+    var left = n ? n.kcal - Math.round(t.kcal) : null;
+    $('#kLeft').hidden = !n;
+    if (n) {
+      $('#kLeft').className = 'left' + (left < 0 ? ' left--over' : '');
+      $('#kLeft').innerHTML = left >= 0 ? (isToday ? 'Осталось ' : 'Не добрал ') + '<b>' + num(left) + ' ккал</b>' : 'Перебор <b>' + num(-left) + ' ккал</b>';
+    }
+    $('#normCta').hidden = !!n;
+    var sumK = t.p * 4 + t.f * 9 + t.c * 4 || 1;
+    $('#macros').innerHTML = MAC.map(function (m, i) {
+      var have = Math.round(t[m[0]]), need = n ? n[m[0]] : 0, kk = [4, 9, 4][i];
+      var pct = need ? Math.min(100, have / need * 100) : 0;
+      return '<li style="--dot:var(' + m[2] + ')"><span>' + m[1] + '</span><b>' + have + '<small>' + (need ? ' / ' + need : '') + ' г</small></b>' +
+        '<div class="bar"><u style="width:' + pct + '%"></u></div><em>' + Math.round(have * kk / sumK * 100) + '% калорий' + (need && have < need ? ' · ещё ' + (need - have) + ' г' : '') + '</em></li>';
     }).join('');
 
     var tip = '';
-    if (!n) tip = 'Заполни вкладку «Я» — посчитаю твою норму калорий и БЖУ.';
-    else if (state.day === state.data.today && list.length) {
+    if (n && isToday && list.length) {
       var pl = n.p - Math.round(t.p);
-      if (left < 0) tip = 'Норма на сегодня уже перебрана на ' + num(-left) + ' ккал.';
-      else if (pl > 25 && left > 150) tip = 'Белка не хватает ~' + pl + ' г — творог, курица, яйца или протеин.';
+      if (left < 0) tip = 'Норма на сегодня перебрана на ' + num(-left) + ' ккал — дальше лучше овощи и белок.';
+      else if (pl > 25 && left > 150) tip = 'Белка не хватает ~' + pl + ' г: творог, курица, яйца или протеин.';
     }
     $('#tip').hidden = !tip; $('#tip').textContent = tip;
 
-    if (!list.length) {
-      $('#meals').innerHTML = '<div class="empty"><b>' + (state.day === state.data.today ? 'Сегодня пока пусто' : 'В этот день записей нет') + '</b>Нажми «Записать еду» или кнопку на iPhone.</div>';
-      return;
-    }
     var groups = {};
     list.forEach(function (i) { (groups[i.meal] = groups[i.meal] || []).push(i); });
-    var order = MEALS.concat(Object.keys(groups).filter(function (m) { return MEALS.indexOf(m) < 0; }));
-    $('#meals').innerHTML = order.filter(function (m) { return groups[m]; }).map(function (m) {
-      var g = groups[m], gt = total(g);
-      return '<div class="meal"><div class="meal__h"><h3>' + esc(m || 'Без приёма') + '</h3><span>' + num(gt.kcal) + ' ккал</span></div>' +
+    var order = MEALS.concat(Object.keys(groups).filter(function (m) { return MEALS.indexOf(m) < 0; })).filter(function (m) { return groups[m]; });
+
+    $('#dayparts').hidden = !list.length;
+    if (list.length) {
+      var base = n ? Math.max(n.kcal, t.kcal) : t.kcal;
+      $('#dpNote').textContent = n ? 'от нормы ' + num(n.kcal) : num(t.kcal) + ' ккал';
+      $('#dpbar').innerHTML = order.map(function (m) {
+        return '<i style="width:' + (total(groups[m]).kcal / base * 100) + '%;background:var(' + (MEAL_COL[m] || '--muted') + ')"></i>';
+      }).join('');
+      $('#dplegend').innerHTML = order.map(function (m) {
+        var k = total(groups[m]).kcal;
+        return '<li style="--mc:var(' + (MEAL_COL[m] || '--muted') + ')"><span>' + esc(m) + '</span><b>' + num(k) + '</b><small>' + Math.round(k / (t.kcal || 1) * 100) + '%</small></li>';
+      }).join('');
+    }
+
+    if (!list.length) {
+      $('#meals').innerHTML = '<div class="empty"><b>' + (isToday ? 'Сегодня пока пусто' : 'В этот день записей нет') + '</b>Нажми «Записать еду» или кнопку на iPhone.</div>';
+      return;
+    }
+    $('#meals').innerHTML = order.map(function (m) {
+      var g = groups[m], gt = total(g), c = MEAL_COL[m] || '--muted';
+      var times = g.map(function (i) { return i.time; }).filter(Boolean).sort();
+      return '<section class="meal" style="--mc:var(' + c + ')">' +
+        '<header class="meal__h"><i class="meal__ic"><svg viewBox="0 0 24 24">' + (MEAL_IC[m] || MEAL_IC['Перекус']) + '</svg></i>' +
+        '<div><h3>' + esc(m || 'Без приёма') + '</h3><small>' + g.length + ' ' + (g.length === 1 ? 'позиция' : g.length < 5 ? 'позиции' : 'позиций') + (times.length ? ' · ' + times[0] : '') + '</small></div>' +
+        '<div class="meal__k"><b>' + num(gt.kcal) + '</b><small>ккал</small></div></header>' +
+        '<p class="meal__m"><span style="color:var(--p)">Б ' + Math.round(gt.p) + '</span><span style="color:var(--f)">Ж ' + Math.round(gt.f) + '</span><span style="color:var(--c)">У ' + Math.round(gt.c) + '</span></p>' +
         g.map(function (i) {
           return '<button class="item" data-id="' + esc(i.id) + '"><b>' + esc(i.product) + '</b><strong>' + num(i.kcal) + '</strong>' +
-            '<small>' + (i.grams ? i.grams + ' г · ' : '') + '<i style="color:var(--p)">Б</i> ' + Math.round(i.p) + ' · <i style="color:var(--f)">Ж</i> ' + Math.round(i.f) + ' · <i style="color:var(--c)">У</i> ' + Math.round(i.c) + (i.time ? ' · ' + esc(i.time) : '') + '</small></button>';
-        }).join('') + '</div>';
+            '<small>' + (i.grams ? i.grams + ' г · ' : '') + 'Б ' + Math.round(i.p) + ' · Ж ' + Math.round(i.f) + ' · У ' + Math.round(i.c) + '</small></button>';
+        }).join('') + '</section>';
     }).join('');
   }
 
@@ -268,6 +310,7 @@
       .then(function () { btn.disabled = false; btn.textContent = 'Посчитать и записать'; });
   });
 
+  $('#normCta').addEventListener('click', function () { state.tab = 'me'; store(K_TAB, 'me'); render(); window.scrollTo(0, 0); });
   $('#askBtn').addEventListener('click', function () { show('#askSheet'); });
   $('#askForm').addEventListener('submit', function (e) {
     e.preventDefault();
